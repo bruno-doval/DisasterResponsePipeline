@@ -2,9 +2,8 @@
 <br>
 This project uses a Machine Learning algorithm to classify the relevancy of twitter messages in a disaster situation. It filter if they are related to some disaster event and classifies them into categories such as requets for help, whater related, food, earthquake etc.
 <br>
-It also provides an web app to be used as a interface for the algorithm.
+It also provides an web app to be used as a interface for the algorithm.<br>
 
-<br>
 ## Python packages used:<br>
 <br>
 This project can be executed using the Anaconda distribution of Python 3.x plus: <br>
@@ -12,6 +11,7 @@ This project can be executed using the Anaconda distribution of Python 3.x plus:
     nltk==3.5 <br>
     Flask==1.1.2 <br>
     plotly==5.1.0 <br>
+
 ## Files contained in repository:<br>
 Readme.md <br>
 categories.csv - classification of messages used for training<br>
@@ -33,5 +33,6 @@ messages.csv -  the content of the messagens used for training<br>
 <br>
 3. Go to http://0.0.0.0:3001/<br>
 <br>
+
 ## Acknowledgment<br>
 I want to thank Udacity for the opportunity to work on such interesting project.<br>
