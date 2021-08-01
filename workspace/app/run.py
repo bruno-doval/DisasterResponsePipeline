@@ -42,10 +42,26 @@ def index():
     # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
+
+    # plot by categry
     categories_counts = df.drop(columns=['id','message','original','genre','related']).sum().sort_values(ascending=False)
     categorie_names = list(categories_counts.index)
     categorie_names = [x.replace('_',' ').title() for x in categorie_names]
+
+    #plot by category coun within messages using bins
+    df_bin = df.drop(columns=['id','message','original','genre','related']).sum(axis=1)
+    df_bin = pd.DataFrame(df_bin).rename(columns={0:'cat_count'})
+
+    bins = pd.cut(df_bin['cat_count'], [0, 2, 4, 6, 8, 10, 12, 14])
+
+    df_bin = df_bin.groupby(bins)['cat_count'].count()
+
+    bins_names = list(df_bin.index)
+    bins_names = [str(x) for x in bins_names]
+    bins_counts = df_bin
+
+
 
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
@@ -84,6 +100,24 @@ def index():
                 },
                 'xaxis': {
                     'title': "Categories"
+                }
+            }
+        },
+    {
+            'data': [
+                Bar(
+                    x=bins_names,
+                    y=bins_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories in Messages',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Number of Categories"
                 }
             }
         }
