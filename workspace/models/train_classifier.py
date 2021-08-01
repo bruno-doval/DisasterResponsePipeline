@@ -22,6 +22,15 @@ from sklearn.metrics import classification_report
 
 
 def load_data(database_filepath):
+    """
+    INPUT:
+    database_filepath: the file path to the database
+
+    OUTPUT:
+    X: features of the message df
+    y: classifications of the messages
+    col_list: list of classification columns
+    """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
 
 
@@ -29,11 +38,19 @@ def load_data(database_filepath):
 
     X = df['message']
     y = df.drop(columns=['id','message','original','genre'])
-
-    return X,y,list(y.columns)
+    col_list = list(y.columns)
+    return X,y,col_list
 
 
 def tokenize(text):
+    """
+    INPUT:
+    text: text to be tokenized
+
+    OUTPUT:
+    clean_tokens: text tokenized
+    """
+
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -54,7 +71,9 @@ def tokenize(text):
 
 def build_model():
 
-
+    """
+    builds a pipeline to be used for modeling a df
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -74,6 +93,16 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    INPUT:
+    model: model to be applied on the df
+    X_test: part of the df to be used as featues
+    Y_text: response part of the df
+    category_names: names pf the categories
+
+    OUTPUT:
+    print the repport comparing the test response data (Y) with the model applied to the test data (X)
+    """
 
     y_pred = model.best_estimator_.predict(X_test)
     y_pred_df = pd.DataFrame(y_pred,columns=Y_test.columns)
@@ -83,6 +112,13 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Saves the model into a pickle file
+
+    INPUT:
+    model: model to be saved
+    model_filepath: file path to save the model on
+    """
     joblib.dump(model.best_estimator_, model_filepath)
 
 

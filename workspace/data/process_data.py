@@ -3,7 +3,16 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    
+    """
+    Loads the data to be processed
+
+    INPUT:
+    messages_filepath: file path of the message csv file 
+    categories_filepath: file path of the categories csv file 
+
+    OUTPUT:
+    df: a dataframe combining the 2 csv files
+    """
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
 
@@ -24,7 +33,9 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    
+    """
+    Cleans the df spliting columns, build a 0/1 columns for each category, etc
+    """
 
     # create a dataframe of the 36 individual category columns
     categories = df.categories.str.split(';',expand=True)
