@@ -1,6 +1,6 @@
 # DisasterResponsePipeline<br>
 <br>
-This project uses a Machine Learning algorithm to classify the relevancy of twitter messages in a disaster situation. It filter if they are related to some disaster event and classifies them into categories such as requets for help, whater related, food, earthquake etc.
+This project uses a Machine Learning algorithm to classify the relevancy of twitter messages in a disaster situation. It filters if they are related to some disaster event and classifies them into categories such as requets for help, whater related, food, earthquake etc so people and organizations can better focus their  rescue effotrts.
 <br>
 It also provides an web app to be used as a interface for the algorithm.<br>
 
@@ -13,12 +13,21 @@ This project can be executed using the Anaconda distribution of Python 3.x plus:
     plotly==5.1.0 <br>
 
 ## Files contained in repository:<br>
-Readme.md <br>
-categories.csv - classification of messages used for training<br>
-messages.csv -  the content of the messagens used for training<br>
-\workspace - folder contaning the ETL for the project as well as the web app<br>
-\workspace\data\process_data.py - python file with the ETL for the project<br>
-\workspace\models\train_classifier.py - python file with the ML model<br>
+<br>
+app<br>
+| - template<br>
+| |- master.html # main page of web app<br>
+| |- go.html # classification result page of web app<br>
+|- run.py # Flask file that runs app<br>
+data<br>
+|- disaster_categories.csv # data to process<br>
+|- disaster_messages.csv # data to process<br>
+|- process_data.py - python file with the ETL for the project<br>
+|- DisasterResponse.db # database to save clean data to<br>
+models<br>
+|- train_classifier.py- python file with the ML model<br>
+README.md<br>
+
 
 ## Instructions:<br>
 1. Run the following commands in the project's root directory to set up your database and model.<br>
