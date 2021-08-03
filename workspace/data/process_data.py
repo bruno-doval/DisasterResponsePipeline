@@ -2,6 +2,14 @@ import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
+
+"""
+To run ETL pipeline that cleans data and stores in database
+`python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
+"""
+
+
+
 def load_data(messages_filepath, categories_filepath):
     """
     Loads the data to be processed
@@ -60,10 +68,9 @@ def clean_data(df):
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].apply(lambda x: x.split('-')[1])
-        
+        categories[column] = categories[column].str.replace('2', '1')
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
-    categories.head()
 
 
     # drop the original categories column from `df`

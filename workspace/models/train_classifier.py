@@ -20,6 +20,12 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 
+"""
+To run ML pipeline that trains classifier and saves
+
+`python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
+"""
+
 
 def load_data(database_filepath):
     """
