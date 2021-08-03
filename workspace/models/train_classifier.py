@@ -114,6 +114,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     y_pred_df = pd.DataFrame(y_pred,columns=Y_test.columns)
 
     for col in category_names:
+        print(col)
         print(classification_report(Y_test[col], y_pred_df[col]))
 
 

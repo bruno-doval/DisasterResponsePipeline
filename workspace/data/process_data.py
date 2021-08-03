@@ -87,6 +87,13 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
+    """
+    Saves the DataFrame into a database
+
+    INPUT:
+    df: dataframe
+    database_filename: name of the database to be saved
+    """
     engine = create_engine('sqlite:///{}'.format(database_filename))
     df.to_sql('Message', engine, index=False, if_exists='replace')
 
