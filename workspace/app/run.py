@@ -2,122 +2,161 @@ import json
 import plotly
 import pandas as pd
 
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar,Table
 import joblib
 from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
-df = pd.read_sql("SELECT * FROM Message", engine)
+# engine = create_engine('sqlite:///../data/User.db')
+# df = pd.read_sql("SELECT * FROM User", engine)
 
-# load model
-model = joblib.load("../models/classifier.pkl")
+# # load model
+# model = joblib.load("../models/classifier.pkl")
 
+# cols_drop =['selected_offer',
+#                         'last_info','event','became_member_on'
+#                         ,'offer_id', 'offer_type','gender',
+#             'amount','reward','difficulty','duration']
+                            
+# X = df[df.last_info==1].copy()
+# X = X.drop(columns =cols_drop).fillna(0)
+
+# classification_labels = model.predict(X.drop(columns=['person']))
+
+# X['selected offer'] = classification_labels
+X=pd.read_csv(r'C:\Users\bruno\OneDrive\Documentos\GitHub\StarbucksCapstone\workspace\X.csv')
+df=pd.read_csv(r'C:\Users\bruno\OneDrive\Documentos\GitHub\StarbucksCapstone\workspace\df.csv')
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
-    
+
+
+    # plot by offer sucess
+    offer_amount = df[df.event=='offer completed'].groupby('offer_id').sum().sort_values(by='offer_amount')['offer_amount']
+    offer_names = list(offer_amount.index)
+
+    offers_sent = df[df.event=='offer received'].groupby('offer_id')[['person']].count().rename(columns={'person':'offers sent'})
+    offer_suc = df[df.offer_success	==1].groupby('offer_id')[['person']].count().rename(columns={'person':'offer success'})
+    df_success = offer_suc.merge(offers_sent,left_index=True,right_index=True)
+    df_success['sucess_rate'] = df_success['offer success']/df_success['offers sent']
+    df_success = df_success.sort_values(by=['sucess_rate'],ascending=False)
+
+
+    offer_success_rate = df_success['sucess_rate']
+    offer_success_id = list(offer_success_rate.index)
+
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+    df_demo = df.drop_duplicates(subset=['person','gender','age']).copy()
+    gender_counts = df_demo.groupby('gender').count()['person']
+    gender_names = list(gender_counts.index)
 
-
-    # plot by categry
-    categories_counts = df.drop(columns=['id','message','original','genre','related']).sum().sort_values(ascending=False)
-    categorie_names = list(categories_counts.index)
-    categorie_names = [x.replace('_',' ').title() for x in categorie_names]
 
     #plot by category coun within messages using bins
-    df_bin = df.drop(columns=['id','message','original','genre','related']).sum(axis=1)
-    df_bin = pd.DataFrame(df_bin).rename(columns={0:'cat_count'})
+    df_demo['ages'] = pd.cut(x=df_demo['age'], bins=list(range(18,128,10)))
+    df_demo['ages'] = df_demo.apply(lambda x: x.ages if x.age<118 else 'not informed',axis=1)
 
-    bins = pd.cut(df_bin['cat_count'], [0, 2, 4, 6, 8, 10, 12, 14])
+    ages = df_demo.groupby('ages')['person'].count()
 
-    df_bin = df_bin.groupby(bins)['cat_count'].count()
-
-    bins_names = list(df_bin.index)
-    bins_names = [str(x) for x in bins_names]
-    bins_counts = df_bin
+    ages_hist = ages
+    ages_names = [str(i) for i in ages_hist.index]
 
 
 
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+
     graphs = [
         {
             'data': [
+                Table(
+                    header=dict(
+                    values=['person', 'selected offer']
+                ),
+                cells=dict(
+                    values=[X[k].tolist() for k in ['person', 'selected offer']])
+                    
+                )
+            ]
+        },
+        {
+            'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=offer_amount,
+                    y=offer_names,
+                    orientation = 'h'
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Revenue per Offer',
                 'yaxis': {
-                    'title': "Count"
+                    'title': "Revenue (USD)"    
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Offer ID"
                 }
             }
-        },
+        },   
 
     {
             'data': [
                 Bar(
-                    x=categorie_names,
-                    y=categories_counts
+                    x=offer_success_id,
+                    y=offer_success_rate
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Categories',
+                'title': 'Success Rate by Offer',
                 'yaxis': {
-                    'title': "Count"
+                    'title': "Rate"
                 },
                 'xaxis': {
-                    'title': "Categories"
+                    'title': "Offer ID"
                 }
             }
         },
     {
             'data': [
                 Bar(
-                    x=bins_names,
-                    y=bins_counts
+                    x=gender_names,
+                    y=gender_counts
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Categories in Messages',
+                'title': 'Distribution of Gender in Clients Base',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Number of Categories"
+                    'title': "Gender"
+                }
+            }
+        },
+    {
+            'data': [
+                Bar(
+                    x=ages_names,
+                    y=ages_hist
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Age in Clients Base',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Age Interval"
                 }
             }
         }
@@ -129,24 +168,6 @@ def index():
     
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
-
-
-# web page that handles user query and displays model results
-@app.route('/go')
-def go():
-    # save user input in query
-    query = request.args.get('query', '') 
-
-    # use model to predict classification for query
-    classification_labels = model.predict([query])[0]
-    classification_results = dict(zip(df.columns[4:], classification_labels))
-
-    # This will render the go.html Please see that file. 
-    return render_template(
-        'go.html',
-        query=query,
-        classification_result=classification_results
-    )
 
 
 def main():
